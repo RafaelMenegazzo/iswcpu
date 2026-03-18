@@ -1,0 +1,46 @@
+﻿@page "/"
+@using System;
+@using System.Diagnostics;
+@using System.Threading;
+
+<PageTitle>Home</PageTitle>
+
+<h1>CPU</h1>
+
+<button class="btn btn-primary" onclick="@(() => OnInitialized(true))">INIT</button>
+<button class="btn btn-secondary" onclick="@(() => OnInitialized(false))">STOP</button>
+
+<p>@cpuInfo</p>
+<p>CPU Usage: @cpuUsage%</p>
+
+@code{
+
+    private PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+    private string? cpuInfo;
+    private float? cpuUsage;
+
+
+    protected void OnInitialized(bool init)
+    {
+
+        System.Diagnostics.Debug.WriteLine("Entrei aqui");
+        if (init)
+        {
+            cpuCounter.NextValue(); // Initialize counter
+            Thread.Sleep(1000); // Simulate delay
+            cpuInfo = $"CPU Info: {Environment.ProcessorCount} cores, {Environment.Is64BitOperatingSystem} 64-bit OS";
+
+            while (init)
+            {
+            cpuUsage = GetCpuUsage();
+            System.Diagnostics.Debug.WriteLine(cpuUsage);
+            
+            }
+        }
+    }
+
+    private float GetCpuUsage()
+    {
+        return cpuCounter.NextValue();
+    }
+}
