@@ -1,42 +1,68 @@
-﻿@page "/"
+﻿@rendermode InteractiveServer
+@page "/"
 @using System;
 @using System.Diagnostics;
 @using System.Threading;
 
 <PageTitle>Home</PageTitle>
 
-<h1>CPU</h1>
 
-<button class="btn btn-primary" onclick="@(() => OnInitialized(true))">INIT</button>
-<button class="btn btn-secondary" onclick="@(() => OnInitialized(false))">STOP</button>
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+        <div class="navbar-nav" id="navbarNavAltMarkup">
+            <a class="nav-link active" aria-current="page" href="LinuxCPU">Linux</a>
+           
+
+        </div>
+        
+    </div>
+</nav>
+
+
+
+<h1>CPU</h1>
+<button class="btn btn-primary" @onclick="() => getInitCPU(true)">INIT</button>
+
 
 <p>@cpuInfo</p>
 <p>CPU Usage: @cpuUsage%</p>
+<p>@status</p>
 
 @code{
 
     private PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-    private string? cpuInfo;
-    private float? cpuUsage;
+    private string? cpuInfo = null;
+    private float? cpuUsage = 0;
+    private string? status = "Não iniciado";
 
-
-    protected void OnInitialized(bool init)
+    public async Task<string> getInitCPU(bool init)
     {
-
-        System.Diagnostics.Debug.WriteLine("Entrei aqui");
-        if (init)
+        if(!init)
         {
-            cpuCounter.NextValue(); // Initialize counter
-            Thread.Sleep(1000); // Simulate delay
-            cpuInfo = $"CPU Info: {Environment.ProcessorCount} cores, {Environment.Is64BitOperatingSystem} 64-bit OS";
-
-            while (init)
-            {
-            cpuUsage = GetCpuUsage();
-            System.Diagnostics.Debug.WriteLine(cpuUsage);
-            
-            }
+            status = "Processo de CPU parado";
+            return "";
         }
+        System.Diagnostics.Debug.WriteLine(init);
+        status = "Processo de CPU iniciado";
+        return getCpuInfo(init);
+
+    }
+
+    private string getCpuInfo(bool init)
+    {
+        cpuCounter.NextValue();
+        Thread.Sleep(1000);
+        while (init)
+        {
+        System.Diagnostics.Debug.WriteLine("Obtendo informações da CPU...");
+        cpuUsage = cpuCounter.NextValue();
+        Thread.Sleep(1000);
+            
+        }
+        return "";
+
+
+
     }
 
     private float GetCpuUsage()
