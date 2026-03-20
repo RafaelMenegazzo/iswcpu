@@ -5,70 +5,93 @@
 @using System.Threading;
 @using System.Linq;
 
-<h3>LinuxCPU</h3>
 
-<h4>Commands</h4>
-<br style="line"/>
-<button class="btn btn-primary" @onclick='(() => runCommand("ps"))'>ps</button>
-<button class="btn btn-primary">top</button>
-
-
-@if(stopButton)
-{
-    <button class="btn btn-danger" @onclick='(() => stopButton = false)'>Stop</button>
-}
-
-<br />
-
-@if (turnOnButton)
-{
+<div>
     <div>
-      <fieldset>
-            <legend>Kill Process</legend>
-            <input type="number" class="input input-group-lg" name="pid" @bind-value="pidKill" placeholder="PID number to kill it" />
-            <button type="submit" class="btn btn-danger" @onclick="() => killProcess(pidKill)">Kill</button>
-            </fieldset>
+
+        <h3>LinuxCPU</h3>
+
+        <h4>Commands</h4>
+
+        <hr />
+        <button class="btn btn-primary" @onclick='(() => runCommand("ps"))'>ps</button>
+        <button class="btn btn-primary" @onclick='() => runCommand("top")'>top</button>
     </div>
 
-    
-}
 
+    <hr />
 
-
-@if (processList != null){
-
-    <table>
-        <thead>
-          <tr>
-              <th>Process</th>
-              <th>PID</th>
-          </tr>
-        </thead>
-        <tbody>
-
-    @foreach(var processes in processList)
+    @if(output != null)
     {
-       <tr>
-          <td>@processes.ProcessName</td> 
-          <td>@processes.Id</td>
-       </tr>
-    }
-        </tbody>
-   
-     </table>
-}
+        <div>
+            <h4>Output</h4>
+            <pre>@output</pre>
+        </div>
 
+    }
+
+
+
+
+    @if(stopButton)
+    {
+        <button class="btn btn-danger" @onclick='(() => stopButton = false)'>Stop</button>
+    }
+
+    <br />
+
+    @if (turnOnButton)
+    {
+        <div>
+          <fieldset>
+                <legend>Kill Process</legend>
+                <input type="number" class="input input-group-lg" name="pid" @bind-value="pidKill" placeholder="PID number to kill it" />
+                <button type="submit" class="btn btn-danger" @onclick="() => killProcess(pidKill)">Kill</button>
+                </fieldset>
+        </div>
+
+    
+    }
+
+
+
+    @if (processList != null){
+
+        <table>
+            <thead>
+              <tr>
+                  <th>Process</th>
+                  <th>PID</th>
+              </tr>
+            </thead>
+            <tbody>
+
+        @foreach(var processes in processList)
+        {
+           <tr>
+              <td>@processes.ProcessName</td> 
+              <td>@processes.Id</td>
+           </tr>
+        }
+            </tbody>
+   
+         </table>
+    }
+
+</div>
 
 
 
 
 @code {
 
-    Process process = new Process();
+    Process process;
     Process[]? processList;
     bool turnOnButton = false;
     bool stopButton = false;
+    bool processing = false;
     int pidKill = 0;
+    string? output;
 
     private async Task getProcess()
     {
@@ -114,7 +137,23 @@
 
     private async Task topCommand()
     {
-        
+        process = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "ping",
+                Arguments = "192.168.2.2",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            }
+        };
+
+        process.Start();
+        processing = true;
+        process.WaitForExit();
+        output = process.StandardOutput.ReadToEnd();
+        System.Diagnostics.Debug.WriteLine(output);
     }
 
     private async Task<string> runCommand(string command)
@@ -131,7 +170,7 @@
                 break;
             case "top":
 
-
+                await topCommand();
 
                 break;
         }
