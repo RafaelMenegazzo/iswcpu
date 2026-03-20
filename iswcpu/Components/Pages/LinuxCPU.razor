@@ -8,30 +8,40 @@
 <h3>LinuxCPU</h3>
 
 <h4>Commands</h4>
+<br style="line"/>
+<button class="btn btn-primary" @onclick='(() => runCommand("ps"))'>ps</button>
+<button class="btn btn-primary">top</button>
 
-<button class="btn btn-primary" @onclick='(() => runCommand("top"))'>ps</button>
-<button class="btn btn-primary">CPU</button>
 
+@if(stopButton)
+{
+    <button class="btn btn-danger" @onclick='(() => stopButton = false)'>Stop</button>
+}
+
+<br />
 
 @if (turnOnButton)
 {
     <div>
-       <input type="number" class="input input-group-lg" name="pid" @bind-value="pidKill" placeholder="PID number to kill it" />
-        <button type="submit" @onclick="() => killProcess(pidKill)" />
+      <fieldset>
+            <legend>Kill Process</legend>
+            <input type="number" class="input input-group-lg" name="pid" @bind-value="pidKill" placeholder="PID number to kill it" />
+            <button type="submit" class="btn btn-danger" @onclick="() => killProcess(pidKill)">Kill</button>
+            </fieldset>
     </div>
 
-    <h1>@pidKill</h1>
+    
 }
 
+
+
+@if (processList != null){
 
     <table>
         <thead>
           <tr>
               <th>Process</th>
               <th>PID</th>
-     
-              <th>Memory</th>
-              <th>Virtual Memory</th>
           </tr>
         </thead>
         <tbody>
@@ -41,13 +51,12 @@
        <tr>
           <td>@processes.ProcessName</td> 
           <td>@processes.Id</td>
-          <td>@processes.WorkingSet64</td>
-          <td>@processes.VirtualMemorySize64</td>
        </tr>
     }
         </tbody>
    
      </table>
+}
 
 
 
@@ -56,40 +65,76 @@
 @code {
 
     Process process = new Process();
-    Process[] processList = Process.GetProcesses();
+    Process[]? processList;
     bool turnOnButton = false;
+    bool stopButton = false;
     int pidKill = 0;
 
-    // private Task getProcess()
-    // {
+    private async Task getProcess()
+    {
+        while (stopButton)
+        {
+            processList = Process.GetProcesses();
+            StateHasChanged();
+            await Task.Delay(1000);
+        }
 
-    // }
+        processList = null;
+        StateHasChanged();
+    }
+
+    private async Task psCommand()
+    {
+
+        await getProcess();
+        turnOnButton = false;
+
+    }
 
     private async Task<string> killProcess(int pid)
     {
-        Process p = Process.GetProcessById(pid);
-        System.Diagnostics.Debug.WriteLine($"Killing process with PID: {p}");
-        if (processList.Select(x => x.Id).Contains(p.Id))
+
+        if (stopButton)
         {
+            Process p = Process.GetProcessById(pid);
+            System.Diagnostics.Debug.WriteLine($"Killing process with PID: {p}");
+            if (processList.Select(x => x.Id).Contains(p.Id))
+            {
 
-            p.Kill();
+                p.Kill();
 
-            turnOnButton = false;
+                turnOnButton = false;
+            }
+
         }
 
         return "";
 
     }
 
+    private async Task topCommand()
+    {
+        
+    }
 
     private async Task<string> runCommand(string command)
     {
-        System.Diagnostics.Debug.WriteLine($"Running command: {command}");
-        if(command.Equals("ps"))
-        {
-            turnOnButton = true;
-        }
 
+
+        switch (command)
+        {
+            case "ps":
+                turnOnButton = true;
+                stopButton = true;
+                await psCommand();
+
+                break;
+            case "top":
+
+
+
+                break;
+        }
         return "";
     }
 
