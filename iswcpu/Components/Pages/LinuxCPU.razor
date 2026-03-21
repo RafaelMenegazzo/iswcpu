@@ -163,8 +163,14 @@
         {
             if (!string.IsNullOrEmpty(args.Data))
             {
-                output = args.Data;
-                StateHasChanged();
+
+                InvokeAsync(() =>
+                {
+
+                    output += args.Data + "\n";
+                    StateHasChanged();
+
+                });
             }
         };
         process.Start();
