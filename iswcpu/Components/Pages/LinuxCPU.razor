@@ -146,10 +146,8 @@
 
     private async Task topCommand()
     {
-
-       
-
-            process = new Process
+        int i = 0;
+        process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -161,20 +159,28 @@
                 }
             };
 
-            process.OutputDataReceived += (sender, args) =>
+        process.OutputDataReceived += (sender, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data))
             {
-                if (!string.IsNullOrEmpty(args.Data))
-                {
-                    output = args.Data;
-                    StateHasChanged();
-                }
+                output = args.Data;
+                StateHasChanged();
+            }
         };
-            process.Start();
-            processing = true;
-            process.WaitForExit(10000);
-            output = process.StandardOutput.ReadToEnd();
-            System.Diagnostics.Debug.WriteLine(output);
-            
+        process.Start();
+        process.BeginOutputReadLine();
+        processing = true;
+
+        while(i< 10)
+        {
+            await Task.Delay(1000);
+            i++;
+        }
+
+        process.Kill();
+        processing = false;
+        
+
     }
 
     private async Task<string> runCommand(string command)
