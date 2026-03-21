@@ -147,32 +147,34 @@
     private async Task topCommand()
     {
 
-        try
-        {
+       
 
             process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "top",
-                    Arguments = "",
+                    Arguments = "-b -d 1",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true,
                 }
             };
 
+            process.OutputDataReceived += (sender, args) =>
+            {
+                if (!string.IsNullOrEmpty(args.Data))
+                {
+                    output = args.Data;
+                    StateHasChanged();
+                }
+        };
             process.Start();
             processing = true;
-            process.WaitForExit();
+            process.WaitForExit(10000);
             output = process.StandardOutput.ReadToEnd();
             System.Diagnostics.Debug.WriteLine(output);
             
-        }catch (Exception ex)
-        {
-            System.Diagnostics.Debug.WriteLine($"Error running top command: {ex.Message}");
-            return;
-        }
     }
 
     private async Task<string> runCommand(string command)
