@@ -1,7 +1,24 @@
 ﻿@rendermode InteractiveServer
 @page "/LinuxPermission"
+@using System;
+@using System.Diagnostics;
+@using System.Threading;
 
-<h3>LinuxP</h3>
+
+<div>
+
+    <h3>LinuxPermission</h3>
+    <hr />
+
+    <fieldset>
+         <input type="text" class="input-group-lg" name="User" placeholder="User to give permissions"/>
+         <input type="text" class="input-group-lg" name="File" placeholder="File allocate the user" />
+    </fieldset>
+
+</div>
+
+
+
 
 @code {
 

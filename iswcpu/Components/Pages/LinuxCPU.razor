@@ -19,27 +19,37 @@
     </div>
 
 
-    <hr />
+    <div>
+        @if(processing)
+        {
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        }
+    </div>
 
+    <hr />
+    <div>
     @if(output != null)
     {
         <div>
             <h4>Output</h4>
             <pre>@output</pre>
         </div>
-
     }
+    </div>
 
-
-
+    <div>
 
     @if(stopButton)
     {
         <button class="btn btn-danger" @onclick='(() => stopButton = false)'>Stop</button>
     }
+    </div>
 
-    <br />
+    <hr />
 
+    <div>
     @if (turnOnButton)
     {
         <div>
@@ -49,9 +59,8 @@
                 <button type="submit" class="btn btn-danger" @onclick="() => killProcess(pidKill)">Kill</button>
                 </fieldset>
         </div>
-
-    
     }
+    </div>
 
 
 
@@ -85,7 +94,7 @@
 
 @code {
 
-    Process process;
+    Process? process;
     Process[]? processList;
     bool turnOnButton = false;
     bool stopButton = false;
@@ -99,7 +108,7 @@
         {
             processList = Process.GetProcesses();
             StateHasChanged();
-            await Task.Delay(1000);
+            await Task.Delay(500);
         }
 
         processList = null;
@@ -137,23 +146,33 @@
 
     private async Task topCommand()
     {
-        process = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "ping",
-                Arguments = "192.168.2.2",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-            }
-        };
 
-        process.Start();
-        processing = true;
-        process.WaitForExit();
-        output = process.StandardOutput.ReadToEnd();
-        System.Diagnostics.Debug.WriteLine(output);
+        try
+        {
+
+            process = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "top",
+                    Arguments = "",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+
+            process.Start();
+            processing = true;
+            process.WaitForExit();
+            output = process.StandardOutput.ReadToEnd();
+            System.Diagnostics.Debug.WriteLine(output);
+            
+        }catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error running top command: {ex.Message}");
+            return;
+        }
     }
 
     private async Task<string> runCommand(string command)

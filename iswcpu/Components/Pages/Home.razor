@@ -17,56 +17,5 @@
         
     </div>
 </nav>
-
-
-
-<h1>CPU</h1>
-<button class="btn btn-primary" @onclick="() => getInitCPU(true)">INIT</button>
-
-
-<p>@cpuInfo</p>
-<p>CPU Usage: @cpuUsage%</p>
-<p>@status</p>
-
 @code{
-
-    private PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-    private string? cpuInfo = null;
-    private float? cpuUsage = 0;
-    private string? status = "Não iniciado";
-
-    public async Task<string> getInitCPU(bool init)
-    {
-        if(!init)
-        {
-            status = "Processo de CPU parado";
-            return "";
-        }
-        System.Diagnostics.Debug.WriteLine(init);
-        status = "Processo de CPU iniciado";
-        return getCpuInfo(init);
-
-    }
-
-    private string getCpuInfo(bool init)
-    {
-        cpuCounter.NextValue();
-        Thread.Sleep(1000);
-        while (init)
-        {
-        System.Diagnostics.Debug.WriteLine("Obtendo informações da CPU...");
-        cpuUsage = cpuCounter.NextValue();
-        Thread.Sleep(1000);
-            
-        }
-        return "";
-
-
-
-    }
-
-    private float GetCpuUsage()
-    {
-        return cpuCounter.NextValue();
-    }
 }
