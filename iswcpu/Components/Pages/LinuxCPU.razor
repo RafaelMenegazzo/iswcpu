@@ -167,7 +167,7 @@
                 InvokeAsync(() =>
                 {
 
-                    output += args.Data + "\n";
+                    output = args.Data + "\n";
                     StateHasChanged();
 
                 });
@@ -185,7 +185,8 @@
 
         process.Kill();
         processing = false;
-        
+        output = "";
+
 
     }
 
@@ -209,8 +210,4 @@
         }
         return "";
     }
-
-
-
-
 }

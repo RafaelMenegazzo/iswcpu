@@ -11,16 +11,58 @@
     <hr />
 
     <fieldset>
-         <input type="text" class="input-group-lg" name="User" placeholder="User to give permissions"/>
-         <input type="text" class="input-group-lg" name="File" placeholder="File allocate the user" />
+        <legend>Give Permission</legend>
+         <input @bind-value="userName" type="text" class="input-group-lg" name="User" placeholder="User to give permissions" />
+         <br />
+         <input @bind-value="fileName" type="text" class="input-group-lg" name="File" placeholder="File allocate the user" />
+         <br />
+         <input @bind-value="password" type="password" class="input-group-lg" name="Password" placeholder="Password for the user" />
+         <br />
+        <button class="btn btn-primary" @onclick="() => givePermission()">Give Permission</button>
     </fieldset>
 
 </div>
 
 
+<p>@output</p>
 
 
 @code {
+
+
+    bool turnOnButton = false;
+    string? userName;
+    string? fileName;
+    string? password;
+    string? output = "";
+
+
+    private async Task runGetTent()
+    {
+        Process gt = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "getent",
+                Arguments = "",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        gt.Start();
+        gt.WaitForExit();
+        output = gt.StandardOutput.ReadToEnd();
+
+    }
+
+    public async Task givePermission()
+    {
+        
+    System.Diagnostics.Debug.WriteLine($"User: {userName}, File: {fileName}, Password: {password}");
+
+    }
 
 
 
