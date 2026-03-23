@@ -15,16 +15,15 @@
 
  @if(turnOnButton)
     {   
+         <h2>Users</h2>
         @foreach(var user in users)
         {
-            <h2>Users</h2>
             <br />
             <p>@user; </p>
         };
-
+        <h2>Directories</h2>
         @foreach(var dir in directories)
         {
-            <h2>Directories</h2>
             <br />
             <p>@dir; </p>
         };
@@ -102,6 +101,7 @@
                 InvokeAsync(() =>
                 {
                     users.Add(username);
+                    StateHasChanged();
                 });
             }
         };
