@@ -133,7 +133,7 @@
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "cd",
-                    Arguments = dir,
+                    Arguments = $" {dir}",
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
                     CreateNoWindow = true
