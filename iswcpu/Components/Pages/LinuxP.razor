@@ -18,13 +18,11 @@
          <h2>Users</h2>
         @foreach(var user in users)
         {
-            <br />
             <p>@user; </p>
         };
         <h2>Directories</h2>
         @foreach(var dir in directories)
         {
-            <br />
             <p>@dir; </p>
         };
 
@@ -35,8 +33,6 @@
              <input @bind-value="userName" type="text" class="input-group-lg" name="User" placeholder="User to give permissions" />
              <br />
              <input @bind-value="fileName" type="text" class="input-group-lg" name="File" placeholder="File allocate the user" />
-             <br />
-             <input @bind-value="password" type="password" class="input-group-lg" name="Password" placeholder="Password for the user" />
              <br />
              <button class="btn btn-primary" @onclick="() => givePermission()">Give Permission</button>
              <button class="btn btn-secondary" @onclick="() => changeDir()">Change Directory</button>
@@ -51,6 +47,9 @@
     }
              </fieldset>
         </div>
+
+
+        <h2>@output</h2>
         
             
         
@@ -68,7 +67,6 @@
     bool turnChange = false;
     string? userName;
     string? fileName;
-    string? password;
     string? dir;
     string? output = "";
     List<string> users = new List<string>();
@@ -77,7 +75,7 @@
 
     private async Task runGetTent()
     {
-        
+
         Process gt = new Process
         {
             StartInfo = new ProcessStartInfo
@@ -117,7 +115,6 @@
     {
         turnChange = true;
         await setDir();
-        turnChange = false;
 
     }
 
@@ -150,7 +147,9 @@
         {
             output = "Directory does not exist.";
         };
-      
+
+        turnChange = false;
+
     }
 
     private async Task getDirectories()
@@ -177,11 +176,51 @@
 
     private async Task analyzeInput()
     {
-        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(password))
+        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(fileName))
         {
             output = "Please fill in all fields.";
             return;
         }
+
+        await givePermissionToUser();
+
+    }
+
+    private async Task givePermissionToUser()
+    {
+        Process chown = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "sudo",
+                Arguments = $"chow {userName} {fileName}",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+        chown.Start();
+        chown.WaitForExit();
+    }
+
+    private async Task showPermission()
+    {
+        Process ls = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "ls",
+                Arguments = "-li",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+        };
+
+        ls.Start();
+        ls.WaitForExit();
+        output = ls.StandardOutput.ReadToEnd();
+        StateHasChanged();
     }
 
     public async Task givePermission()
