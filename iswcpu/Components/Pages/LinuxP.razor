@@ -69,6 +69,7 @@
     string? fileName;
     string? dir;
     string? output = "";
+    string currentDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     List<string> users = new List<string>();
     List<string> directories = new List<string>();
 
@@ -126,27 +127,32 @@
             return;
         };
 
-        if(directories.Contains(dir))
+        string newPath;
+
+        if (dir == "..")
         {
-            Process cd = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "cd",
-                    Arguments = $" {dir}",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                }
-            };
-            cd.Start();
-            cd.WaitForExit();
-            output = $"Changed directory to {dir}";
+            newPath = Directory.GetParent(currentDir)?.FullName ?? currentDir;
+        }
+        else
+        {
+            newPath = Path.Combine(currentDir, dir);
+        }
+
+        if (Directory.Exists(newPath))
+        {
+            currentDir = newPath;
+            output = $"Changed directory to {currentDir}";
+            await getDirectories(); // atualiza lista
         }
         else
         {
             output = "Directory does not exist.";
-        };
+        }
+
+        turnChange = false;
+        await InvokeAsync(StateHasChanged);
+
+ 
 
         turnChange = false;
 
@@ -154,21 +160,11 @@
 
     private async Task getDirectories()
     {
-        Process gt = new Process
-        {
-            StartInfo = new ProcessStartInfo
-            {
-                FileName = "ls",
-                Arguments = "",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            }
-        };
-        gt.Start();
-        gt.WaitForExit();
-        directories = gt.StandardOutput.ReadToEnd().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
-        StateHasChanged();
+        directories = Directory.GetDirectories(currentDir)
+       .Select(Path.GetFileName)
+       .ToList();
+
+        await InvokeAsync(StateHasChanged);
     }
 
 
@@ -193,7 +189,7 @@
             StartInfo = new ProcessStartInfo
             {
                 FileName = "sudo",
-                Arguments = $"chow {userName} {fileName}",
+                Arguments = $"chown {userName} {fileName}",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
