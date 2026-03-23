@@ -197,22 +197,31 @@
 
     private async Task showPermission()
     {
+        var fullPath = Path.Combine(currentDir, fileName);
+
         Process ls = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 FileName = "ls",
-                Arguments = $"-li {Path.Combine(currentDir, fileName)}",
+                Arguments = $"-li \"{fullPath}\"",
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             }
         };
 
         ls.Start();
-        ls.WaitForExit();
-        output = ls.StandardOutput.ReadToEnd();
-        StateHasChanged();
+
+        string result = await ls.StandardOutput.ReadToEndAsync();
+        string error = await ls.StandardError.ReadToEndAsync();
+
+        await ls.WaitForExitAsync();
+
+        output = string.IsNullOrEmpty(error) ? result : error;
+
+        await InvokeAsync(StateHasChanged);
     }
 
     public async Task givePermission()
