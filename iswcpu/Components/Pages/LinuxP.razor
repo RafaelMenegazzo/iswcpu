@@ -184,7 +184,7 @@
             StartInfo = new ProcessStartInfo
             {
                 FileName = "sudo",
-                Arguments = $"chown {userName} {fileName}",
+                Arguments = $"chown {userName} {Path.Combine(currentDir, fileName}",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -192,6 +192,7 @@
         };
         chown.Start();
         chown.WaitForExit();
+        showPermission();
     }
 
     private async Task showPermission()
