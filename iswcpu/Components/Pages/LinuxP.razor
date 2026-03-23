@@ -71,7 +71,7 @@
     string? output = "";
     string currentDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     List<string> users = new List<string>();
-    List<string?> directories = new List<string>();
+    List<string?> directories = new List<string?>();
 
 
     private async Task runGetTent()
@@ -184,7 +184,7 @@
             StartInfo = new ProcessStartInfo
             {
                 FileName = "sudo",
-                Arguments = $"chown {userName} {Path.Combine(currentDir, fileName}",
+                Arguments = $"chown {userName} {Path.Combine(currentDir, fileName)}",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
