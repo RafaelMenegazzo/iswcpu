@@ -60,8 +60,9 @@
 
     public async Task givePermission()
     {
-        
-    System.Diagnostics.Debug.WriteLine($"User: {userName}, File: {fileName}, Password: {password}");
+
+        await runGetTent();   
+        System.Diagnostics.Debug.WriteLine($"User: {userName}, File: {fileName}, Password: {password}");
 
     }
 
