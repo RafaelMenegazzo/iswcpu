@@ -191,7 +191,7 @@
             }
         };
         chown.Start();
-        chown.WaitForExit();
+        await chown.WaitForExitAsync();
         await showPermission();
     }
 
@@ -204,7 +204,7 @@
             StartInfo = new ProcessStartInfo
             {
                 FileName = "ls",
-                Arguments = $"-li \"{fullPath}\"",
+                Arguments = $"-li -d \"{fullPath}\"",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,
