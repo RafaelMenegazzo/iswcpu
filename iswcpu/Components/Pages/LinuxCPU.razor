@@ -100,7 +100,7 @@
     bool stopButton = false;
     bool processing = false;
     int pidKill = 0;
-    string? output;
+    string? output = null;
 
     private async Task getProcess()
     {
@@ -186,7 +186,7 @@
         process.Kill();
         processing = false;
         output = null;
-        StateHasChanged();
+       
 
 
     }

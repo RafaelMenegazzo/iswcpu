@@ -4,67 +4,183 @@
 @using System.Diagnostics;
 @using System.Threading;
 
+<h3>LinuxPermission</h3>
+<hr />
+
+<button class="btn btn-primary" @onclick='(() => givePermission())'>Set Permission</button>
 
 <div>
 
-    <h3>LinuxPermission</h3>
-    <hr />
 
-    <fieldset>
-        <legend>Give Permission</legend>
-         <input @bind-value="userName" type="text" class="input-group-lg" name="User" placeholder="User to give permissions" />
-         <br />
-         <input @bind-value="fileName" type="text" class="input-group-lg" name="File" placeholder="File allocate the user" />
-         <br />
-         <input @bind-value="password" type="password" class="input-group-lg" name="Password" placeholder="Password for the user" />
-         <br />
-        <button class="btn btn-primary" @onclick="() => givePermission()">Give Permission</button>
-    </fieldset>
+
+ @if(turnOnButton)
+    {   
+        @foreach(var user in users)
+        {
+            <h2>Users</h2>
+            <br />
+            <p>@user; </p>
+        };
+
+        @foreach(var dir in directories)
+        {
+            <h2>Directories</h2>
+            <br />
+            <p>@dir; </p>
+        };
+
+        <h2>Use the information above to give permission to an user</h2>
+        <div>
+             <fieldset>
+             <legend>User info</legend>
+             <input @bind-value="userName" type="text" class="input-group-lg" name="User" placeholder="User to give permissions" />
+             <br />
+             <input @bind-value="fileName" type="text" class="input-group-lg" name="File" placeholder="File allocate the user" />
+             <br />
+             <input @bind-value="password" type="password" class="input-group-lg" name="Password" placeholder="Password for the user" />
+             <br />
+             <button class="btn btn-primary" @onclick="() => givePermission()">Give Permission</button>
+             <button class="btn btn-secondary" @onclick="() => changeDir()">Change Directory</button>
+              @if (turnChange)
+    {
+               <div>
+                <input type="text" class="input input-group-lg" name="dir" @bind-value="dir" placeholder="Directory to change" />
+                <button type="submit" class="btn btn-primary" @onclick="() => changeDir()">Change</button>
+               </div>
+
+
+    }
+             </fieldset>
+        </div>
+        
+            
+        
+ }
 
 </div>
 
 
-<p>@output</p>
 
 
 @code {
 
 
     bool turnOnButton = false;
+    bool turnChange = false;
     string? userName;
     string? fileName;
     string? password;
+    string? dir;
     string? output = "";
+    List<string> users = new List<string>();
+    List<string> directories = new List<string>();
 
 
     private async Task runGetTent()
     {
+        
         Process gt = new Process
         {
             StartInfo = new ProcessStartInfo
             {
                 FileName = "getent",
-                Arguments = "",
+                Arguments = "passwd | cut -d: -f1",
+                RedirectStandardOutput = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            }
+
+        };
+
+        gt.Start();
+        gt.WaitForExit();
+        users = gt.StandardOutput.ReadToEnd().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
+        StateHasChanged();
+
+    }
+
+    private async Task changeDir()
+    {
+        turnChange = true;
+        await setDir();
+
+    }
+
+    private async Task setDir()
+    {
+        if (string.IsNullOrEmpty(dir))
+        {
+            output = "Please fill in the directory field.";
+            return;
+        };
+
+        if(directories.Contains(dir))
+        {
+            Process cd = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cd",
+                    Arguments = dir,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                }
+            };
+            cd.Start();
+            cd.WaitForExit();
+            output = $"Changed directory to {dir}";
+        }
+        else
+        {
+            output = "Directory does not exist.";
+        };
+      
+    }
+
+    private async Task getDirectories()
+    {
+        Process gt = new Process
+        {
+            StartInfo = new ProcessStartInfo
+            {
+                FileName = "ls",
+                Arguments = "-d */",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             }
         };
-
         gt.Start();
         gt.WaitForExit();
-        output = gt.StandardOutput.ReadToEnd();
+        directories = gt.StandardOutput.ReadToEnd().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
         StateHasChanged();
+    }
 
+
+
+
+    private async Task analyzeInput()
+    {
+        if (string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(fileName) || string.IsNullOrEmpty(password))
+        {
+            output = "Please fill in all fields.";
+            return;
+        }
     }
 
     public async Task givePermission()
     {
 
-        await runGetTent();   
-        System.Diagnostics.Debug.WriteLine($"User: {userName}, File: {fileName}, Password: {password}");
+        await runGetTent();
+        await getDirectories();
+        turnOnButton = true;
+        await analyzeInput();
+ 
 
     }
+
+
 
 
 
