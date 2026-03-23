@@ -54,6 +54,7 @@
         gt.Start();
         gt.WaitForExit();
         output = gt.StandardOutput.ReadToEnd();
+        StateHasChanged();
 
     }
 
