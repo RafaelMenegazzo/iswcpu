@@ -84,7 +84,7 @@
             StartInfo = new ProcessStartInfo
             {
                 FileName = "getent",
-                Arguments = "passwd | cut -d: -f1",
+                Arguments = "passwd",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -92,9 +92,23 @@
 
         };
 
+
+        gt.OutputDataReceived += (sender, args) =>
+        {
+            if (!string.IsNullOrEmpty(args.Data))
+            {
+                var username = args.Data.Split(':')[0];
+
+                InvokeAsync(() =>
+                {
+                    users.Add(username);
+                });
+            }
+        };
+
         gt.Start();
+        gt.BeginOutputReadLine();
         gt.WaitForExit();
-        users = gt.StandardOutput.ReadToEnd().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList();
         StateHasChanged();
 
     }
@@ -103,6 +117,7 @@
     {
         turnChange = true;
         await setDir();
+        turnChange = false;
 
     }
 
@@ -145,7 +160,7 @@
             StartInfo = new ProcessStartInfo
             {
                 FileName = "ls",
-                Arguments = "-d */",
+                Arguments = "",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
