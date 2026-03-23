@@ -71,7 +71,7 @@
     string? output = "";
     string currentDir = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
     List<string> users = new List<string>();
-    List<string> directories = new List<string>();
+    List<string?> directories = new List<string>();
 
 
     private async Task runGetTent()
@@ -149,12 +149,7 @@
             output = "Directory does not exist.";
         }
 
-        turnChange = false;
         await InvokeAsync(StateHasChanged);
-
- 
-
-        turnChange = false;
 
     }
 
