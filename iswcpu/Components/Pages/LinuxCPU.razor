@@ -14,8 +14,11 @@
         <h4>Commands</h4>
 
         <hr />
+        <div class="btn-group" role="group">
+
         <button class="btn btn-primary" @onclick='(() => runCommand("ps"))'>ps</button>
         <button class="btn btn-primary" @onclick='() => runCommand("top")'>top</button>
+        </div>
     </div>
 
 
@@ -47,8 +50,6 @@
     }
     </div>
 
-    <hr />
-
     <div>
     @if (turnOnButton)
     {
@@ -66,11 +67,11 @@
 
     @if (processList != null){
 
-        <table>
+        <table class="table">
             <thead>
               <tr>
-                  <th>Process</th>
-                  <th>PID</th>
+                  <th scope="col">Process</th>
+                  <th scope ="col">PID</th>
               </tr>
             </thead>
             <tbody>
